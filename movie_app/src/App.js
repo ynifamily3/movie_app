@@ -21,48 +21,44 @@ class App extends Component {
 
   componentDidMount() {
     // 3
-    setTimeout(()=>{
-      this.setState({
-        movies: [
-        {
-          title: "Matrix",
-          poster: "m1.png"
-        },
-        {
-          title: "Nichijou",
-          poster: "m2.png"
-        },
-        {
-          title: "Samakani",
-          poster: "m3.png"
-        },
-        {
-          title: "Overwatch",
-          poster: "m4.png"
-        },
-        {
-          title: 'Trainspotting',
-          poster: 'm5.png'
-        }
-
-        ]
-      });
-    }, 2000);
+    this._getMovies();
   }
 
+  testGenre = ['anime']
   _renderMovies = () => {
-    const movies = this.state.movies.map((movie, index) => {
-      return <Movie title={movie.title} poster={movie.poster} key={index} />
+    const movies = this.state.movies.map(movie => {
+      return <Movie title={movie.s} 
+                    poster={movie.img} 
+                    key={movie.i} 
+                    genres={this.testGenre}
+                    synopsis={movie.s}
+      />
     })
     return movies;
   };
 
+  _getMovies = async () => {
+    const movies = await this._callApi();
+    // call api 작업이 완료되기 전까지는 실행되지 않음  
+    this.setState({
+      movies // == movies: movies (모던 자바스크립트)
+    });
+  }
+
+  _callApi = () => {
+    return fetch('https://ohli.moe/timetable/list/now')
+    .then(potato => potato.json())
+    .then(json => {console.log(json[new Date().getDay()]); return json[new Date().getDay()]})
+    .catch(err => console.log(err))
+  }
+
   render() {
     // 2 
     // 컴포넌트 안에 state가 바뀔 때 마다, render이 발생 할 것이다.
+    const { movies } = this.state;
     return (
-      <div className="App">
-        {this.state.movies ? this._renderMovies() : 'Loading'}
+      <div className={movies? "App" : "App--loading"}>
+        {movies ? this._renderMovies() : 'Loading'}
       </div>
     );
   }
